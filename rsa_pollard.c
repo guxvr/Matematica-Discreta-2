@@ -15,6 +15,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 // --------- Prototipos ----------
 int mdc(int a, int b);
@@ -43,18 +44,35 @@ int main() {
 
     printf("=== Sistema RSA com Fatoração ρ de Pollard ===\n");
     printf("Digite N1 (3 ou 4 dígitos, produto de primos distintos): ");
-    scanf("%d", &N1);
+    if (scanf("%d", &N1) != 1) {
+        fprintf(stderr, "Entrada inválida para N1.\n");
+        return 1;
+    }
     printf("Digite N2 (3 ou 4 dígitos, produto de primos distintos): ");
-    scanf("%d", &N2);
+    if (scanf("%d", &N2) != 1) {
+        fprintf(stderr, "Entrada inválida para N2.\n");
+        return 1;
+    }
+    // Limpar resto da linha após os scanf (consumir até '\n')
+    int ch;
+    while ((ch = getchar()) != '\n' && ch != EOF) {}
 
     // Etapa 1: Fatoração
-    printf("\n-- Fatoração de N1 --\n");
+  printf("\n-- Fatoração de N1 --\n");
     p = pollard_rho(N1);
     printf("Fator encontrado para N1: p = %d\n", p);
+    if (p <= 1 || p == N1) { // valida retorno
+        fprintf(stderr, "Falha ao fatorar N1 (p=%d). Tente outro N1 composto.\n", p);
+        return 1;
+    }
 
     printf("\n-- Fatoração de N2 --\n");
     q = pollard_rho(N2);
     printf("Fator encontrado para N2: q = %d\n", q);
+    if (q <= 1 || q == N2) { // valida retorno
+        fprintf(stderr, "Falha ao fatorar N2 (q=%d). Tente outro N2 composto.\n", q);
+        return 1;
+    }
 
     // Etapa 2: Geração de Chaves RSA
     gera_chaves(p, q, &n, &z, &e, &d);
@@ -63,8 +81,13 @@ int main() {
 
     // Etapa 3: Codificação e Criptografia
     printf("\nDigite a mensagem (apenas letras e espaços): ");
-    getchar(); // Limpar buffer
-    fgets(mensagem, 256, stdin);
+    if (fgets(mensagem, sizeof(mensagem), stdin) == NULL) {
+        fprintf(stderr, "Falha ao ler a mensagem.\n");
+        return 1;
+    }
+    // Remover '\n' final, se presente, para comparação correta
+    size_t len = strlen(mensagem);
+    if (len > 0 && mensagem[len-1] == '\n') mensagem[len-1] = '\0';
 
     codifica_mensagem(mensagem, codificada, &tam);
 
@@ -124,8 +147,8 @@ int pollard_rho(int N) {
         i++;                                                // Proxima iteraçao
         if(i > 100) break; // Prevenir loop infinito
     }
-    if(d == N) return 0; // Falha
-    return d;
+ if (d == N || d == 1) return -1; // Falhou
+return d;
 }
 
 // Algoritmo de Euclides Estendido (passo a passo)
