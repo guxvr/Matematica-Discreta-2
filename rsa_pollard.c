@@ -17,6 +17,9 @@
 #include <stdlib.h>
 #include <string.h>
 
+// Variável global para registrar φ(n) (totiente) para logs e reduções (Euler)
+static int g_phi_n = -1;
+
 // --------- Prototipos ----------
 int mdc(int a, int b);
 int pollard_rho(int N);
@@ -48,9 +51,21 @@ int main() {
         fprintf(stderr, "Entrada inválida para N1.\n");
         return 1;
     }
+    if (N1 < 100 || N1 > 9999) {
+        fprintf(stderr, "N1 fora da faixa [100, 9999].\n");
+        return 1;
+    }
     printf("Digite N2 (3 ou 4 dígitos, produto de primos distintos): ");
     if (scanf("%d", &N2) != 1) {
         fprintf(stderr, "Entrada inválida para N2.\n");
+        return 1;
+    }
+    if (N2 < 100 || N2 > 9999) {
+        fprintf(stderr, "N2 fora da faixa [100, 9999].\n");
+        return 1;
+    }
+    if (N1 == N2) {
+        fprintf(stderr, "N1 e N2 devem ser distintos.\n");
         return 1;
     }
     // Limpar resto da linha após os scanf (consumir até '\n')
@@ -58,28 +73,71 @@ int main() {
     while ((ch = getchar()) != '\n' && ch != EOF) {}
 
     // Etapa 1: Fatoração
-  printf("\n-- Fatoração de N1 --\n");
+        printf("\n-- Fatoração de N1 --\n");
     p = pollard_rho(N1);
     printf("Fator encontrado para N1: p = %d\n", p);
-    if (p <= 1 || p == N1) { // valida retorno
+    if (p <= 1 || p == N1 || p == -1) { // valida retorno
         fprintf(stderr, "Falha ao fatorar N1 (p=%d). Tente outro N1 composto.\n", p);
         return 1;
+    }
+    // Preferir o maior fator primo de N1 (para aumentar n)
+    int p_co = N1 / p;
+    if (p_co == p) {
+        fprintf(stderr, "N1 deve ser produto de primos distintos (não quadrado de primo).\n");
+        return 1;
+    }
+    if (p_co > 1 && is_prime(p_co) && p_co > p) {
+        printf("Usando maior fator de N1: %d (em vez de %d)\n", p_co, p);
+        p = p_co;
     }
 
     printf("\n-- Fatoração de N2 --\n");
     q = pollard_rho(N2);
     printf("Fator encontrado para N2: q = %d\n", q);
-    if (q <= 1 || q == N2) { // valida retorno
+    if (q <= 1 || q == N2 || q == -1) { // valida retorno
         fprintf(stderr, "Falha ao fatorar N2 (q=%d). Tente outro N2 composto.\n", q);
         return 1;
     }
+    // Preferir o maior fator primo de N2 (para aumentar n)
+    int q_co = N2 / q;
+    if (q_co == q) {
+        fprintf(stderr, "N2 deve ser produto de primos distintos (não quadrado de primo).\n");
+        return 1;
+    }
+    if (q_co > 1 && is_prime(q_co) && q_co > q) {
+        printf("Usando maior fator de N2: %d (em vez de %d)\n", q_co, q);
+        q = q_co;
+    }
+    // Evitar p == q; se iguais, tentar o outro fator
+    if (p == q) {
+        int alt_q = (q_co > 1 && is_prime(q_co) && q_co != p) ? q_co : (N2 / q);
+        if (alt_q > 1 && is_prime(alt_q) && alt_q != p) {
+            printf("Ajustando q para evitar p==q: %d -> %d\n", q, alt_q);
+            q = alt_q;
+        } else {
+            int alt_p = (p_co > 1 && is_prime(p_co) && p_co != q) ? p_co : (N1 / p);
+            if (alt_p > 1 && is_prime(alt_p) && alt_p != q) {
+                printf("Ajustando p para evitar p==q: %d -> %d\n", p, alt_p);
+                p = alt_p;
+            } else {
+                fprintf(stderr, "Erro: N1 e N2 compartilham o mesmo fator primo (%d). Escolha N1 e N2 sem fatores em comum.\n", p);
+                return 1;
+            }
+        }
+    }
+    
 
-    // Etapa 2: Geração de Chaves RSA
+    // --------------------Etapa 2: Geração de Chaves RSA------------------------------//
     gera_chaves(p, q, &n, &z, &e, &d);
     printf("\nChave pública: (n=%d, e=%d)\n", n, e);
     printf("Chave privada: (n=%d, d=%d)\n", n, d);
+    // Validar que n suporta o alfabeto (0 e 11..36)
+    if (n <= 36) {
+        fprintf(stderr, "Erro: n=%d <= 36. Escolha N1 e N2 com fatores maiores para obter n>36.\n", n);
+        return 1;
+    }
 
-    // Etapa 3: Codificação e Criptografia
+    // ----------------------Etapa 3: Codificação e Criptografia------------------------//
     printf("\nDigite a mensagem (apenas letras e espaços): ");
     if (fgets(mensagem, sizeof(mensagem), stdin) == NULL) {
         fprintf(stderr, "Falha ao ler a mensagem.\n");
@@ -90,6 +148,13 @@ int main() {
     if (len > 0 && mensagem[len-1] == '\n') mensagem[len-1] = '\0';
 
     codifica_mensagem(mensagem, codificada, &tam);
+    // Verificar que todos os símbolos são menores que n (para evitar redução modular)
+    for (i = 0; i < tam; i++) {
+        if (codificada[i] >= n) {
+            fprintf(stderr, "Erro: símbolo %02d >= n (%d). Gere chaves com n maior.\n", codificada[i], n);
+            return 1;
+        }
+    }
 
     printf("\nMensagem codificada: ");
     for(i=0; i<tam; i++) printf("%02d ", codificada[i]);
@@ -119,7 +184,7 @@ int main() {
     return 0;
 }
 
-// --------- Implementações (exemplo de estrutura, implementar cada uma depois) ----------
+// --------- Implementações (exemplo de estrutura, implementar cada uma depois) ---------- /
 
 // Algoritmo de Euclides para MDC (passo a passo)
 int mdc(int a, int b) {
@@ -153,14 +218,17 @@ return d;
 
 // Algoritmo de Euclides Estendido (passo a passo)
 int euclides_estendido(int a, int b, int* x, int* y) {
+    printf("EE: chamada com a=%d, b=%d\n", a, b);
     if(a == 0) {                                            // Caso base
         *x = 0; *y = 1;                                     // Coeficientes
+        printf("EE: base -> gcd=%d, x=%d, y=%d\n", b, *x, *y);
         return b;                                         
     }
     int x1, y1;                                       // Variáveis temporárias  
     int gcd = euclides_estendido(b % a, a, &x1, &y1);   // Chamada recursiva
     *x = y1 - (b/a)*x1;                                 // atualiza x e y
     *y = x1;
+    printf("EE: retorna para a=%d, b=%d -> gcd=%d, x=%d, y=%d\n", a, b, gcd, *x, *y);
     return gcd;                                   // Retorna o MDC                              
 }
 
@@ -181,6 +249,7 @@ int totiente(int p, int q) {                // p e q são primos
 void gera_chaves(int p, int q, int* n, int* z, int* e, int* d) {       
     *n = p * q;                             // n = p * q
     *z = totiente(p, q);                   // z = φ(n)
+    g_phi_n = *z;                          // Registrar φ(n) globalmente para logs de Euler
     // Encontrar e tal que mdc(e, z) == 1   
     for(*e = 2; *e < *n; (*e)++) {  
         if(mdc(*e, *z) == 1) break;         // e encontrado
@@ -191,24 +260,53 @@ void gera_chaves(int p, int q, int* n, int* z, int* e, int* d) {
 
 // Exponenciação modular (com decisão de teorema)
 int exponenciacao_modular(int base, int exp, int mod, int *teorema) {
-    // Decisão do teorema (simplificado, implementar lógica completa)
+    if (mod <= 1) {
+        fprintf(stderr, "Erro: módulo inválido (%d) em exponenciacao_modular.\n", mod);
+        if (teorema) *teorema = 3;
+        return 0;
+    }
+    // Decisão do teorema e redução de expoente
+    int reduced_exp = exp;
     if(is_prime(mod)) {
         *teorema = 1; // Fermat
-        printf("Usando Teorema de Fermat\n");
+        printf("Usando Teorema de Fermat: como n é primo, reduzimos expoente por (n-1).\n");
+        if (base % mod != 0) {
+            int r = exp % (mod - 1);
+            printf("Redução de expoente: %d -> %d (mod %d)\n", exp, r, mod - 1);
+            reduced_exp = r;
+        } else {
+            printf("Base múltipla de n: redução por Fermat não se aplica.\n");
+        }
     } else if(mdc(base, mod) == 1) {
         *teorema = 2; // Euler
-        printf("Usando Teorema de Euler\n");
+        printf("Usando Teorema de Euler: mdc(base,n)=1, reduzimos expoente por φ(n).\n");
+        if (g_phi_n > 0) {
+            int r = exp % g_phi_n;
+            printf("Redução de expoente: %d -> %d (mod φ(n)=%d)\n", exp, r, g_phi_n);
+            reduced_exp = r;
+        } else {
+            printf("φ(n) não disponível para redução numérica; seguindo sem reduzir.\n");
+        }
     } else {
         *teorema = 3; // Divisão Euclidiana
-        printf("Usando Divisão Euclidiana\n");
+        printf("Usando Divisão Euclidiana: sem condições para Fermat/Euler; exponenciação binária direta.\n");
     }
+    // Exponenciação rápida com rastreamento
     int result = 1;               
+    int step = 0;
     base = base % mod;                     // Atualiza base se maior que mod
-    while(exp > 0) {
-        if(exp % 2 == 1) result = (result * base) % mod;    // Se exp é ímpar
+    printf("Passos da exponenciação: base=%d, expoente=%d, mod=%d\n", base, reduced_exp, mod);
+    while(reduced_exp > 0) {
+        printf("  passo %d: result=%d, base=%d, exp=%d\n", step, result, base, reduced_exp);
+        if(reduced_exp % 2 == 1) {
+            result = (result * base) % mod;    // Se exp é ímpar
+            printf("    -> exp ímpar, result = (result*base) mod n = %d\n", result);
+        }
         base = (base * base) % mod;     // base = base^2 mod mod
-        exp /= 2;             // exp = exp // 2
+        reduced_exp /= 2;             // exp = exp // 2
+        step++;
     }
+    printf("Resultado final da potência modular: %d\n", result);
     return result;
 }
 
