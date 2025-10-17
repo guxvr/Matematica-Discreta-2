@@ -10,9 +10,8 @@ Este espaço foi criado para compartilhar e organizar as soluções dos exercíc
 
 ```
 /
-├── exercicios/
-│   ├── lista1/
-│   ├── lista2/
+│   ├── questao1/
+│   ├── questao2/
 │   └── ...
 ├── docs/
 │   └── explicacoes.md
