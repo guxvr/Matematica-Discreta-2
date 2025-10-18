@@ -22,11 +22,10 @@ Este espaço foi criado para compartilhar e organizar as soluções dos exercíc
 - **exercicios/**: Diretório para os códigos dos exercícios, organizados em listas.
 - **docs/**: Arquivos de explicações, anotações ou resumos sobre os temas abordados.
 - **README.md**: Este arquivo, com as informações gerais do projeto.
+- **v_ou_f.md**: Este arquivo é referente à questão 4 e possui a saída do primeiro exercício e as respostas em V ou F do segundo exercício.
 
 ## Licença
 
 Este repositório está sob a licença MIT. Veja o arquivo [LICENSE](LICENSE) para mais informações.
 
 ---
-
-> Este README será atualizado conforme novos exercícios forem discutidos e adicionados ao repositório.

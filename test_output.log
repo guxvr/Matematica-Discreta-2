@@ -1,0 +1,56 @@
+==========================================
+Testes Automatizados: RSA com Pollard ρ
+==========================================
+
+=== Testes de Validação de Entrada ===
+[1] N1 fora da faixa (99)... [0;32mPASS[0m
+[2] N1 fora da faixa (10000)... [0;32mPASS[0m
+[3] N2 fora da faixa (50)... [0;32mPASS[0m
+[4] N1 = N2... [0;32mPASS[0m
+
+=== Testes de Fatoração Inválida ===
+[5] N1 primo (997)... [0;32mPASS[0m
+[6] N2 primo (211)... [0;32mPASS[0m
+[7] N1 quadrado de primo (121=11²)... [0;32mPASS[0m
+[8] N2 quadrado de primo (169=13²)... [0;31mFAIL[0m
+  Esperado: código ≠ 0 e mensagem 'N2 inválido.*primos distintos'
+  Obtido: código 1
+  Saída resumida:
+    Calculando MDC(0, 169):
+    a = 0, b = 169
+    Resultado MDC: 169
+           4 |  2 |  2 | 169
+    Fator encontrado para N2: q = -1
+[9] N1 e N2 com primo compartilhado (391=17×23, 437=19×23)... [0;32mPASS[0m
+
+=== Testes de n Inválido ===
+[10] n muito pequeno (N1=15, N2=21, n=35)... [0;31mFAIL[0m
+  Esperado: código ≠ 0 e mensagem 'n=.*<= 36'
+  Obtido: código 1
+  Saída resumida:
+    N1 fora da faixa [100, 9999].
+    === Sistema RSA com Fatoração ρ de Pollard ===
+    Digite N1 (3 ou 4 dígitos, produto de primos distintos): 
+
+=== Testes Válidos (Casos de Sucesso) ===
+[11] Caso válido 1: N1=391(17×23), N2=209(11×19), msg='TESTE'... [0;32mPASS[0m
+[12] Caso válido 2: N1=187(11×17), N2=299(13×23), msg='ABC'... [0;31mFAIL[0m
+  Esperado: código 0 e mensagem 'Confirmação: Ok'
+  Obtido: código 1
+  Saída resumida:
+    Calculando MDC(0, 299):
+    a = 0, b = 299
+    Resultado MDC: 299
+           4 | 262 | 262 | 299
+    Fator encontrado para N2: q = -1
+[13] Caso válido 3: N1=437(19×23), N2=209(11×19), msg='OLA MUNDO'... [0;32mPASS[0m
+[14] Caso válido 4: Mensagem com espaços e maiúsculas/minúsculas... [0;32mPASS[0m
+
+=== Testes de Borda ===
+[15] Mensagem vazia... [0;32mPASS[0m
+[16] Mensagem com espaços... [0;32mPASS[0m
+
+==========================================
+Resultados: [0;32m13 passaram[0m, [0;31m3 falharam[0m
+==========================================
+[0;31mAlguns testes falharam.[0m

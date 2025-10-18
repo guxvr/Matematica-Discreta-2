@@ -26,6 +26,9 @@ int pollard_rho(int N);
 int euclides_estendido(int a, int b, int* x, int* y);
 int mod_inverse(int e, int z);
 int is_prime(int n);
+int isqrt(int n);
+int is_perfect_square(int n);
+int trial_division(int N);
 int totiente(int p, int q);
 void gera_chaves(int p, int q, int* n, int* z, int* e, int* d);
 int exponenciacao_modular(int base, int exp, int mod, int *teorema);
@@ -74,56 +77,56 @@ int main() {
 
     // Etapa 1: Fatoração
         printf("\n-- Fatoração de N1 --\n");
+    // Validar se N1 é quadrado perfeito antes de tentar fatorar
+    if (is_perfect_square(N1)) {
+        int root = isqrt(N1);
+        fprintf(stderr, "N1=%d é quadrado perfeito (%d²). Deve ser produto de primos distintos.\n", N1, root);
+        return 1;
+    }
     p = pollard_rho(N1);
     printf("Fator encontrado para N1: p = %d\n", p);
-    if (p <= 1 || p == N1 || p == -1) { // valida retorno
+    if (p <= 1 || p == N1) { // valida retorno
         fprintf(stderr, "Falha ao fatorar N1 (p=%d). Tente outro N1 composto.\n", p);
         return 1;
     }
-    // Preferir o maior fator primo de N1 (para aumentar n)
+    // Validar que N1 = p * p_co com p e p_co primos distintos; preferir o maior
     int p_co = N1 / p;
-    if (p_co == p) {
-        fprintf(stderr, "N1 deve ser produto de primos distintos (não quadrado de primo).\n");
+    if (!is_prime(p) || !is_prime(p_co) || p == p_co) {
+        fprintf(stderr, "N1 inválido: deve ser produto de dois primos distintos. Fatores: %d e %d.\n", p, p_co);
         return 1;
     }
-    if (p_co > 1 && is_prime(p_co) && p_co > p) {
+    if (p_co > p) {
         printf("Usando maior fator de N1: %d (em vez de %d)\n", p_co, p);
         p = p_co;
     }
 
     printf("\n-- Fatoração de N2 --\n");
+    // Validar se N2 é quadrado perfeito antes de tentar fatorar
+    if (is_perfect_square(N2)) {
+        int root = isqrt(N2);
+        fprintf(stderr, "N2=%d é quadrado perfeito (%d²). Deve ser produto de primos distintos.\n", N2, root);
+        return 1;
+    }
     q = pollard_rho(N2);
     printf("Fator encontrado para N2: q = %d\n", q);
-    if (q <= 1 || q == N2 || q == -1) { // valida retorno
+    if (q <= 1 || q == N2) { // valida retorno
         fprintf(stderr, "Falha ao fatorar N2 (q=%d). Tente outro N2 composto.\n", q);
         return 1;
     }
-    // Preferir o maior fator primo de N2 (para aumentar n)
+    // Validar que N2 = q * q_co com q e q_co primos distintos; preferir o maior
     int q_co = N2 / q;
-    if (q_co == q) {
-        fprintf(stderr, "N2 deve ser produto de primos distintos (não quadrado de primo).\n");
+    if (!is_prime(q) || !is_prime(q_co) || q == q_co) {
+        fprintf(stderr, "N2 inválido: deve ser produto de dois primos distintos. Fatores: %d e %d.\n", q, q_co);
         return 1;
     }
-    if (q_co > 1 && is_prime(q_co) && q_co > q) {
+    if (q_co > q) {
         printf("Usando maior fator de N2: %d (em vez de %d)\n", q_co, q);
         q = q_co;
     }
-    // Evitar p == q; se iguais, tentar o outro fator
+    // Evitar p == q (N1 e N2 não devem compartilhar o mesmo primo)
     if (p == q) {
-        int alt_q = (q_co > 1 && is_prime(q_co) && q_co != p) ? q_co : (N2 / q);
-        if (alt_q > 1 && is_prime(alt_q) && alt_q != p) {
-            printf("Ajustando q para evitar p==q: %d -> %d\n", q, alt_q);
-            q = alt_q;
-        } else {
-            int alt_p = (p_co > 1 && is_prime(p_co) && p_co != q) ? p_co : (N1 / p);
-            if (alt_p > 1 && is_prime(alt_p) && alt_p != q) {
-                printf("Ajustando p para evitar p==q: %d -> %d\n", p, alt_p);
-                p = alt_p;
-            } else {
-                fprintf(stderr, "Erro: N1 e N2 compartilham o mesmo fator primo (%d). Escolha N1 e N2 sem fatores em comum.\n", p);
-                return 1;
-            }
-        }
+        fprintf(stderr, "Erro: N1 e N2 compartilham o mesmo fator primo (%d). Escolha N1 e N2 sem fatores em comum.\n", p);
+        return 1;
     }
     
 
@@ -199,21 +202,43 @@ int mdc(int a, int b) {
     return a;                                  // Retorna o MDC
 }
 
-// Pollard Rho interativo (passo a passo)
+// Pollard Rho interativo (passo a passo) com tentativas múltiplas
 int pollard_rho(int N) {
-    int x = 2, y = 2, d = 1, i = 1;
-    printf("Iteracao | x | y | d\n");
-    while(d == 1) {                          // Loop até encontrar fator                       
-        x = (x*x + 1) % N;                   // Função f(x) = (x^2 + 1) mod N
-        y = (y*y + 1) % N;                   // Função f(y) = (y^2 + 1) mod N
-        y = (y*y + 1) % N;                   // y avança duas vezes
-        d = mdc(abs(x-y), N);               // Calcula MDC
-        printf("%8d | %2d | %2d | %2d\n", i, x, y, d);      // Imprime estado atual
-        i++;                                                // Proxima iteraçao
-        if(i > 100) break; // Prevenir loop infinito
+    // Tentar com diferentes sementes e constantes
+    int seeds[] = {2, 3, 5, 7};
+    int constants[] = {1, 2, 3};
+    
+    for (int s_idx = 0; s_idx < 4; s_idx++) {
+        for (int c_idx = 0; c_idx < 3; c_idx++) {
+            int x0 = seeds[s_idx];
+            int c = constants[c_idx];
+            
+            if (s_idx > 0 || c_idx > 0) {
+                printf("\nTentativa com semente x0=%d, constante c=%d\n", x0, c);
+            }
+            
+            int x = x0, y = x0, d = 1, i = 1;
+            printf("Iteracao | x | y | d\n");
+            
+            while(d == 1 && i <= 200) {  // Aumentado limite para 200
+                x = ((long long)x*x + c) % N;
+                y = ((long long)y*y + c) % N;
+                y = ((long long)y*y + c) % N;
+                d = mdc(abs(x-y), N);
+                printf("%8d | %2d | %2d | %2d\n", i, x, y, d);
+                i++;
+            }
+            
+            if (d > 1 && d < N) {
+                printf("Fator encontrado com x0=%d, c=%d\n", x0, c);
+                return d;
+            }
+        }
     }
- if (d == N || d == 1) return -1; // Falhou
-return d;
+    
+    // Todas as tentativas falharam; usar fallback
+    printf("\nPollard ρ falhou após múltiplas tentativas.\n");
+    return trial_division(N);
 }
 
 // Algoritmo de Euclides Estendido (passo a passo)
@@ -346,4 +371,39 @@ int is_prime(int n) {
     for(int i=2; i*i<=n; i++)   // Testa divisores até √n
         if(n % i == 0) return 0;    // Não é primo
     return 1; // É primo
+}
+
+// Raiz quadrada inteira (método de Newton) - implementação própria
+int isqrt(int n) {
+    if (n < 0) return -1;
+    if (n == 0) return 0;
+    if (n == 1) return 1;
+    
+    // Chute inicial
+    int x = n;
+    int y = (x + 1) / 2;
+    
+    // Itera até convergir
+    while (y < x) {
+        x = y;
+        y = (x + n / x) / 2;
+    }
+    return x;
+}
+
+// Verifica se N é quadrado perfeito (usando raiz própria)
+int is_perfect_square(int n) {
+    if (n < 0) return 0;
+    int root = isqrt(n);
+    return root * root == n;
+}
+
+// Fatoração por divisão por tentativa (fallback)
+int trial_division(int N) {
+    printf("Usando divisão por tentativa como fallback...\n");
+    if (N % 2 == 0) return 2;
+    for (int i = 3; i * i <= N; i += 2) {
+        if (N % i == 0) return i;
+    }
+    return N; // N é primo
 }

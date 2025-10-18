@@ -1,3 +1,8 @@
+/*
+ * Chaves periódicas
+ * Disciplina: Matemática Discreta 2
+ * Autor: Gustavo Xavier Evangelista - 241025247
+ */
 #include <stdio.h>
 
 // Função MDC (máximo divisor comum)
