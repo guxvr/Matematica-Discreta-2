@@ -1,4 +1,45 @@
 
+# Questão 4: Análise de Código - Divisão Modular e Teoremas
+
+**Autor:** Gustavo Xavier Evangelista  
+**Disciplina:** Matemática Discreta 2
+
+---
+
+## Como compilar e executar
+
+### Passo 1: Navegar até o diretório do projeto
+A partir da raiz do repositório, entre na pasta da questão 4:
+```bash
+cd exercicios/questao4
+```
+
+### Passo 2: Compilar o código
+Compile o arquivo `bonus.c`:
+```bash
+gcc -Wall -Wextra -O2 bonus.c -o bonus
+```
+
+**Explicação dos parâmetros:**
+- `-Wall -Wextra`: Habilita warnings para detectar possíveis problemas
+- `-O2`: Otimização de código para melhor desempenho
+- `bonus.c`: Arquivo fonte
+- `-o bonus`: Nome do executável gerado
+
+### Passo 3: Executar o programa
+```bash
+./bonus
+```
+
+### Compilação alternativa (uma linha, a partir da raiz do repositório)
+```bash
+gcc -Wall -Wextra -O2 exercicios/questao4/bonus.c -o exercicios/questao4/bonus && exercicios/questao4/bonus
+```
+
+**Dependências:** stdio.h (biblioteca padrão C)
+
+---
+
 ## Teste de Verificação
 
 **Entrada:** H=7, G=3, Zn=11, x=10, n1=13

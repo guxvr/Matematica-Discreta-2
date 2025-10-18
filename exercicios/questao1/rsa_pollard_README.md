@@ -28,13 +28,37 @@ Projeto didático em C que implementa um sistema completo de criptografia RSA co
   - Iterações da exponenciação rápida (binária) passo a passo.
 - Guardas numéricas (ex.: módulo inválido em exponenciação).
 
-## Como compilar e executar (Linux)
-```sh
+## Como compilar e executar
+
+### Passo 1: Navegar até o diretório do projeto
+A partir da raiz do repositório, entre na pasta da questão 1:
+```bash
+cd exercicios/questao1
+```
+
+### Passo 2: Compilar o código
+Compile o arquivo `rsa_pollard.c` com as flags de otimização e warnings:
+```bash
 gcc -Wall -Wextra -O2 rsa_pollard.c -o rsa_pollard
+```
+
+**Explicação dos parâmetros:**
+- `-Wall -Wextra`: Habilita warnings para detectar possíveis problemas
+- `-O2`: Otimização de código para melhor desempenho
+- `rsa_pollard.c`: Arquivo fonte
+- `-o rsa_pollard`: Nome do executável gerado
+
+### Passo 3: Executar o programa
+```bash
 ./rsa_pollard
 ```
 
-Dependências: stdio.h, stdlib.h, string.h (todas padrão).
+### Compilação alternativa (uma linha, a partir da raiz do repositório)
+```bash
+gcc -Wall -Wextra -O2 exercicios/questao1/rsa_pollard.c -o exercicios/questao1/rsa_pollard && exercicios/questao1/rsa_pollard
+```
+
+**Dependências:** stdio.h, stdlib.h, string.h (todas bibliotecas padrão C)
 
 ## Fluxo do programa
 1. Entrada e validação:

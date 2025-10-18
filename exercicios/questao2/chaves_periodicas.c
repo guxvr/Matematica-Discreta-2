@@ -1,13 +1,13 @@
 /*
- * Chaves periódicas
- * Disciplina: Matemática Discreta 2
+ * Chaves periodicas
+ * Disciplina: Matematica Discreta 2
  * Autor: Gustavo Xavier Evangelista - 241025247
  */
 #include <stdio.h>
 
-// Função MDC (máximo divisor comum)
+// Funcao MDC (maximo divisor comum)
 int mdc(int a, int b) {
-    while (b != 0) {                         // Loop até b ser 0        
+    while (b != 0) {                         // Loop ate b ser 0        
         int t = b;                           // Swap       
         b = a % b;              
         a = t;
@@ -15,7 +15,7 @@ int mdc(int a, int b) {
     return a;
 }
 
-// Função MMC (mínimo múltiplo comum)
+// Funcao MMC (minimo multiplo comum)
 int mmc(int a, int b) {
     return (a * b) / mdc(a, b);             // MMC(a, b) = (a*b)/MDC(a,b)
 }
@@ -24,11 +24,12 @@ int main() {
     int N, i, ciclos[10];
     int resultado;
 
-    printf("Digite o número de chaves: ");
+    printf("Digite o numero de chaves: ");
     scanf("%d", &N);
 
-    printf("Digite os ciclos das chaves: ");
+    printf("\n");
     for (i = 0; i < N; i++) {
+        printf("Ciclo %d: ", i + 1);
         scanf("%d", &ciclos[i]);
     }
 
@@ -39,9 +40,9 @@ int main() {
     }
 
     if (resultado > 50) {
-        printf("Não é possível sincronizar todas as chaves dentro do limite de 50 anos.\n");
+        printf("\nNao e possivel sincronizar todas as chaves dentro do limite de 50 anos.\n");
     } else {
-        printf("%d\n", resultado);
+        printf("\n%d\n", resultado);
     }
 
     return 0;

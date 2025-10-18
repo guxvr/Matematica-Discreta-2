@@ -1,18 +1,16 @@
 /*
- * A Razão de Eficiência de um Número
- * Disciplina: Matemática Discreta 2
+ * A Razao de Eficiencia de um Numero
+ * Disciplina: Matematica Discreta 2
  * Autor: Gustavo Xavier Evangelista - 241025247
  */
 #include <stdio.h>
-
-typedef unsigned long long u64;
 
 typedef struct {
     int p;   // primo
     int e;   // expoente
 } Factor;
 
-// Fatoração por divisão de tentativas (Trial Division) até sqrt(n)
+// Fatoracao por divisao de tentativas (Trial Division) ate sqrt(n)
 int factorize(int n, Factor fac[], int maxf) {
     int count = 0;
     int x = n;
@@ -23,7 +21,7 @@ int factorize(int n, Factor fac[], int maxf) {
         while (x % 2 == 0) { x /= 2; e++; }
         if (count < maxf) { fac[count].p = 2; fac[count].e = e; count++; }
     }
-    // ímpares
+    // impares
     for (int d = 3; (long long)d * d <= x; d += 2) {
         if (x % d == 0) {
             int e = 0;
@@ -38,11 +36,11 @@ int factorize(int n, Factor fac[], int maxf) {
     return count;
 }
 
-// soma geométrica 1 + p + p^2 + ... + p^e (evita overflow de potências grandes)
-u64 geometric_sum(int p, int e) {
-    u64 sum = 1, term = 1;
+// soma geometrica 1 + p + p^2 + ... + p^e (evita overflow de potencias grandes)
+unsigned long long geometric_sum(int p, int e) {
+    unsigned long long sum = 1, term = 1;
     for (int i = 1; i <= e; i++) {
-        term *= (u64)p;
+        term *= (unsigned long long)p;
         sum += term;
     }
     return sum;
@@ -63,7 +61,7 @@ int main(void) {
 
     // Caso especial N = 1
     if (N == 1) {
-        printf("Fatores primos: (nenhum), pois 1 não tem fatoracao prima convencional.\n");
+        printf("Fatores primos: (nenhum), pois 1 nao tem fatoracao prima convencional.\n");
         printf("Calculo de tau(N): tau(1) = 1\n");
         printf("Calculo de sigma(N): sigma(1) = 1\n");
         double razao = 1.0; // sigma(1)/tau(1)
@@ -71,7 +69,7 @@ int main(void) {
         return 0;
     }
 
-    // Fatoração
+    // Fatoracao
     Factor fac[16]; // suficiente para N <= 1e5
     int k = factorize(N, fac, 16);
 
@@ -84,31 +82,31 @@ int main(void) {
     printf("\n");
 
     // Calculo de tau(N) = prod (e_i + 1)
-    u64 tau = 1;
+    unsigned long long tau = 1;
     printf("Calculo de tau(N):\n");
     printf("tau = ");
     for (int i = 0; i < k; i++) {
-        u64 term = (u64)(fac[i].e + 1);
+        unsigned long long term = (unsigned long long)(fac[i].e + 1);
         tau *= term;
         printf("(%d+1)%s", fac[i].e, (i + 1 < k ? " * " : ""));
     }
-    printf(" = %llu\n", tau);
+    printf(" = %lld\n", tau);
 
     // Calculo de sigma(N) = prod (1 + p + p^2 + ... + p^e)
-    u64 sigma = 1;
+    unsigned long long sigma = 1;
     printf("Calculo de sigma(N):\n");
     for (int i = 0; i < k; i++) {
-        u64 sum = geometric_sum(fac[i].p, fac[i].e);
+        unsigned long long sum = geometric_sum(fac[i].p, fac[i].e);
         sigma *= sum;
         printf("Termo para p=%d, e=%d: 1", fac[i].p, fac[i].e);
-        u64 term = 1;
+        unsigned long long term = 1;
         for (int j = 1; j <= fac[i].e; j++) {
-            term *= (u64)fac[i].p;
-            printf(" + %llu", term);
+            term *= (unsigned long long)fac[i].p;
+            printf(" + %lld", term);
         }
-        printf(" = %llu\n", sum);
+        printf(" = %lld\n", sum);
     }
-    printf("sigma = produto dos termos acima = %llu\n", sigma);
+    printf("sigma = produto dos termos acima = %lld\n", sigma);
 
     // Razao de eficiencia: media dos divisores = sigma/tau
     double razao = (double)sigma / (double)tau;

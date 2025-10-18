@@ -48,8 +48,8 @@ int main() {
     int tam;
     int i, teorema;
 
-    printf("=== Sistema RSA com Fatoração ρ de Pollard ===\n");
-    printf("Digite N1 (3 ou 4 dígitos, produto de primos distintos): ");
+    printf("=== Sistema RSA com Fatoracao Rho de Pollard ===\n");
+    printf("Digite N1 (3 ou 4 digitos, produto de primos distintos): ");
     if (scanf("%d", &N1) != 1) {
         fprintf(stderr, "Entrada inválida para N1.\n");
         return 1;
@@ -58,7 +58,7 @@ int main() {
         fprintf(stderr, "N1 fora da faixa [100, 9999].\n");
         return 1;
     }
-    printf("Digite N2 (3 ou 4 dígitos, produto de primos distintos): ");
+    printf("Digite N2 (3 ou 4 digitos, produto de primos distintos): ");
     if (scanf("%d", &N2) != 1) {
         fprintf(stderr, "Entrada inválida para N2.\n");
         return 1;
@@ -75,12 +75,12 @@ int main() {
     int ch;
     while ((ch = getchar()) != '\n' && ch != EOF) {}
 
-    // Etapa 1: Fatoração
-        printf("\n-- Fatoração de N1 --\n");
-    // Validar se N1 é quadrado perfeito antes de tentar fatorar
+    // Etapa 1: Fatoracao
+        printf("\n-- Fatoracao de N1 --\n");
+    // Validar se N1 e quadrado perfeito antes de tentar fatorar
     if (is_perfect_square(N1)) {
         int root = isqrt(N1);
-        fprintf(stderr, "N1=%d é quadrado perfeito (%d²). Deve ser produto de primos distintos.\n", N1, root);
+        fprintf(stderr, "N1=%d e quadrado perfeito (%d^2). Deve ser produto de primos distintos.\n", N1, root);
         return 1;
     }
     p = pollard_rho(N1);
@@ -92,7 +92,7 @@ int main() {
     // Validar que N1 = p * p_co com p e p_co primos distintos; preferir o maior
     int p_co = N1 / p;
     if (!is_prime(p) || !is_prime(p_co) || p == p_co) {
-        fprintf(stderr, "N1 inválido: deve ser produto de dois primos distintos. Fatores: %d e %d.\n", p, p_co);
+        fprintf(stderr, "N1 invalido: deve ser produto de dois primos distintos. Fatores: %d e %d.\n", p, p_co);
         return 1;
     }
     if (p_co > p) {
@@ -100,11 +100,11 @@ int main() {
         p = p_co;
     }
 
-    printf("\n-- Fatoração de N2 --\n");
-    // Validar se N2 é quadrado perfeito antes de tentar fatorar
+    printf("\n-- Fatoracao de N2 --\n");
+    // Validar se N2 e quadrado perfeito antes de tentar fatorar
     if (is_perfect_square(N2)) {
         int root = isqrt(N2);
-        fprintf(stderr, "N2=%d é quadrado perfeito (%d²). Deve ser produto de primos distintos.\n", N2, root);
+        fprintf(stderr, "N2=%d e quadrado perfeito (%d^2). Deve ser produto de primos distintos.\n", N2, root);
         return 1;
     }
     q = pollard_rho(N2);
@@ -116,7 +116,7 @@ int main() {
     // Validar que N2 = q * q_co com q e q_co primos distintos; preferir o maior
     int q_co = N2 / q;
     if (!is_prime(q) || !is_prime(q_co) || q == q_co) {
-        fprintf(stderr, "N2 inválido: deve ser produto de dois primos distintos. Fatores: %d e %d.\n", q, q_co);
+        fprintf(stderr, "N2 invalido: deve ser produto de dois primos distintos. Fatores: %d e %d.\n", q, q_co);
         return 1;
     }
     if (q_co > q) {
@@ -140,8 +140,8 @@ int main() {
         return 1;
     }
 
-    // ----------------------Etapa 3: Codificação e Criptografia------------------------//
-    printf("\nDigite a mensagem (apenas letras e espaços): ");
+    // ----------------------Etapa 3: Codificacao e Criptografia------------------------//
+    printf("\nDigite a mensagem (apenas letras MAIUSCULAS e espacos): ");
     if (fgets(mensagem, sizeof(mensagem), stdin) == NULL) {
         fprintf(stderr, "Falha ao ler a mensagem.\n");
         return 1;
@@ -150,11 +150,20 @@ int main() {
     size_t len = strlen(mensagem);
     if (len > 0 && mensagem[len-1] == '\n') mensagem[len-1] = '\0';
 
+    // Validar que a mensagem contem apenas letras maiusculas e espacos
+    for (i = 0; mensagem[i] != '\0'; i++) {
+        char c = mensagem[i];
+        if (c != ' ' && (c < 'A' || c > 'Z')) {
+            fprintf(stderr, "Erro: mensagem contem caractere invalido '%c'. Use apenas letras MAIUSCULAS (A-Z) e espacos.\n", c);
+            return 1;
+        }
+    }
+
     codifica_mensagem(mensagem, codificada, &tam);
-    // Verificar que todos os símbolos são menores que n (para evitar redução modular)
+    // Verificar que todos os simbolos sao menores que n (para evitar reducao modular)
     for (i = 0; i < tam; i++) {
         if (codificada[i] >= n) {
-            fprintf(stderr, "Erro: símbolo %02d >= n (%d). Gere chaves com n maior.\n", codificada[i], n);
+            fprintf(stderr, "Erro: simbolo %02d >= n (%d). Gere chaves com n maior.\n", codificada[i], n);
             return 1;
         }
     }
@@ -176,13 +185,13 @@ int main() {
         printf("Decifra(%d) = %02d [teorema %d]\n", cifrada[i], decifrada[i], teorema);
     }
 
-    // Reconversão numérica para texto
+    // Reconversao numerica para texto
     char mensagem_decifrada[256];
     decodifica_mensagem(decifrada, tam, mensagem_decifrada);
     printf("\nMensagem decifrada: %s\n", mensagem_decifrada);
 
-    // Verificação
-    printf("\nConfirmação: %s\n", strcmp(mensagem, mensagem_decifrada)==0 ? "Ok" : "Diferente");
+    // Verificacao
+    printf("\nConfirmacao: %s\n", strcmp(mensagem, mensagem_decifrada)==0 ? "Ok" : "Diferente");
 
     return 0;
 }
@@ -237,7 +246,7 @@ int pollard_rho(int N) {
     }
     
     // Todas as tentativas falharam; usar fallback
-    printf("\nPollard ρ falhou após múltiplas tentativas.\n");
+    printf("\nPollard Rho falhou apos multiplas tentativas.\n");
     return trial_division(N);
 }
 
@@ -249,7 +258,7 @@ int euclides_estendido(int a, int b, int* x, int* y) {
         printf("EE: base -> gcd=%d, x=%d, y=%d\n", b, *x, *y);
         return b;                                         
     }
-    int x1, y1;                                       // Variáveis temporárias  
+    int x1, y1;                                       // Variaveis temporarias  
     int gcd = euclides_estendido(b % a, a, &x1, &y1);   // Chamada recursiva
     *x = y1 - (b/a)*x1;                                 // atualiza x e y
     *y = x1;
@@ -261,7 +270,7 @@ int euclides_estendido(int a, int b, int* x, int* y) {
 int mod_inverse(int e, int z) {
     int x, y;                               
     int g = euclides_estendido(e, z, &x, &y);   // Chama Euclides Estendido
-    if(g != 1) return -1;                     // Inverso não existe se mdc != 1
+    if(g != 1) return -1;                     // Inverso nao existe se mdc != 1
     else return (x % z + z) % z;          // Garante positivo
 }
 
@@ -270,11 +279,11 @@ int totiente(int p, int q) {                // p e q são primos
     return (p-1)*(q-1);                     // φ(n) = (p-1)(q-1)
 }
 
-// Geração de chaves RSA
+// Geracao de chaves RSA
 void gera_chaves(int p, int q, int* n, int* z, int* e, int* d) {       
     *n = p * q;                             // n = p * q
-    *z = totiente(p, q);                   // z = φ(n)
-    g_phi_n = *z;                          // Registrar φ(n) globalmente para logs de Euler
+    *z = totiente(p, q);                   // z = phi(n)
+    g_phi_n = *z;                          // Registrar phi(n) globalmente para logs de Euler
     // Encontrar e tal que mdc(e, z) == 1   
     for(*e = 2; *e < *n; (*e)++) {  
         if(mdc(*e, *z) == 1) break;         // e encontrado
@@ -283,68 +292,67 @@ void gera_chaves(int p, int q, int* n, int* z, int* e, int* d) {
     printf("Chaves geradas passo a passo.\n");
 }
 
-// Exponenciação modular (com decisão de teorema)
+// Exponenciacao modular (com decisao de teorema)
 int exponenciacao_modular(int base, int exp, int mod, int *teorema) {
     if (mod <= 1) {
-        fprintf(stderr, "Erro: módulo inválido (%d) em exponenciacao_modular.\n", mod);
+        fprintf(stderr, "Erro: modulo invalido (%d) em exponenciacao_modular.\n", mod);
         if (teorema) *teorema = 3;
         return 0;
     }
-    // Decisão do teorema e redução de expoente
+    // Decisao do teorema e reducao de expoente
     int reduced_exp = exp;
     if(is_prime(mod)) {
         *teorema = 1; // Fermat
-        printf("Usando Teorema de Fermat: como n é primo, reduzimos expoente por (n-1).\n");
+        printf("Usando Teorema de Fermat: como n e primo, reduzimos expoente por (n-1).\n");
         if (base % mod != 0) {
             int r = exp % (mod - 1);
-            printf("Redução de expoente: %d -> %d (mod %d)\n", exp, r, mod - 1);
+            printf("Reducao de expoente: %d -> %d (mod %d)\n", exp, r, mod - 1);
             reduced_exp = r;
         } else {
-            printf("Base múltipla de n: redução por Fermat não se aplica.\n");
+            printf("Base multipla de n: reducao por Fermat nao se aplica.\n");
         }
     } else if(mdc(base, mod) == 1) {
         *teorema = 2; // Euler
-        printf("Usando Teorema de Euler: mdc(base,n)=1, reduzimos expoente por φ(n).\n");
+        printf("Usando Teorema de Euler: mdc(base,n)=1, reduzimos expoente por phi(n).\n");
         if (g_phi_n > 0) {
             int r = exp % g_phi_n;
-            printf("Redução de expoente: %d -> %d (mod φ(n)=%d)\n", exp, r, g_phi_n);
+            printf("Reducao de expoente: %d -> %d (mod phi(n)=%d)\n", exp, r, g_phi_n);
             reduced_exp = r;
         } else {
-            printf("φ(n) não disponível para redução numérica; seguindo sem reduzir.\n");
+            printf("phi(n) nao disponivel para reducao numerica; seguindo sem reduzir.\n");
         }
     } else {
-        *teorema = 3; // Divisão Euclidiana
-        printf("Usando Divisão Euclidiana: sem condições para Fermat/Euler; exponenciação binária direta.\n");
+        *teorema = 3; // Divisao Euclidiana
+        printf("Usando Divisao Euclidiana: sem condicoes para Fermat/Euler; exponenciacao binaria direta.\n");
     }
-    // Exponenciação rápida com rastreamento
+    // Exponenciacao rapida com rastreamento
     int result = 1;               
     int step = 0;
     base = base % mod;                     // Atualiza base se maior que mod
-    printf("Passos da exponenciação: base=%d, expoente=%d, mod=%d\n", base, reduced_exp, mod);
+    printf("Passos da exponenciacao: base=%d, expoente=%d, mod=%d\n", base, reduced_exp, mod);
     while(reduced_exp > 0) {
         printf("  passo %d: result=%d, base=%d, exp=%d\n", step, result, base, reduced_exp);
         if(reduced_exp % 2 == 1) {
-            result = (result * base) % mod;    // Se exp é ímpar
-            printf("    -> exp ímpar, result = (result*base) mod n = %d\n", result);
+            result = (result * base) % mod;    // Se exp e impar
+            printf("    -> exp impar, result = (result*base) mod n = %d\n", result);
         }
         base = (base * base) % mod;     // base = base^2 mod mod
         reduced_exp /= 2;             // exp = exp // 2
         step++;
     }
-    printf("Resultado final da potência modular: %d\n", result);
+    printf("Resultado final da potencia modular: %d\n", result);
     return result;
 }
 
-// Funções de codificação numérica de letras
+// Funcoes de codificacao numerica de letras (apenas maiusculas)
 int codifica_caractere(char c) {
-    if(c == ' ') return 0;                                // Espaço (impresso como 00 com %02d)
+    if(c == ' ') return 0;                                // Espaco (impresso como 00 com %02d)
     if(c >= 'A' && c <= 'Z') return 10 + (c - 'A' + 1);   // A=11, B=12, ..., Z=36
-    if(c >= 'a' && c <= 'z') return 10 + (c - 'a' + 1);   // a=11, b=12, ..., z=36
-    return 99; // Indefinido
+    return -1; // Caractere invalido
 }
 
 char decodifica_numero(int n) {
-    if(n == 0) return ' ';                       // Espaço (impresso como 00 com %02d)
+    if(n == 0) return ' ';                       // Espaco (impresso como 00 com %02d)
     if(n >= 11 && n <= 36) return 'A' + (n - 11);   // A=11, B=12, ..., Z=36
     return '?'; // Indefinido
 }
@@ -352,7 +360,13 @@ char decodifica_numero(int n) {
 void codifica_mensagem(const char* msg, int* codificada, int* tam) {    
     int i;
     for(i = 0; msg[i] != '\0' && msg[i] != '\n'; i++) {    
-        codificada[i] = codifica_caractere(msg[i]);     // Codifica caractere
+        int cod = codifica_caractere(msg[i]);           // Codifica caractere
+        if (cod == -1) {                                // Validacao adicional
+            fprintf(stderr, "Erro: caractere invalido '%c' na posicao %d.\n", msg[i], i);
+            *tam = 0;
+            return;
+        }
+        codificada[i] = cod;
     }
     *tam = i;                                           // Tamanho da mensagem codificada
 }
@@ -365,15 +379,15 @@ void decodifica_mensagem(const int* codificada, int tam, char* msg) {
     msg[tam] = '\0';                               // Finaliza string
 }
 
-// Verificação de primalidade (simples)
+// Verificacao de primalidade (simples)
 int is_prime(int n) {
     if(n < 2) return 0;
-    for(int i=2; i*i<=n; i++)   // Testa divisores até √n
-        if(n % i == 0) return 0;    // Não é primo
-    return 1; // É primo
+    for(int i=2; i*i<=n; i++)   // Testa divisores ate raiz(n)
+        if(n % i == 0) return 0;    // Nao e primo
+    return 1; // E primo
 }
 
-// Raiz quadrada inteira (método de Newton) - implementação própria
+// Raiz quadrada inteira (metodo de Newton) - implementacao propria
 int isqrt(int n) {
     if (n < 0) return -1;
     if (n == 0) return 0;
@@ -383,7 +397,7 @@ int isqrt(int n) {
     int x = n;
     int y = (x + 1) / 2;
     
-    // Itera até convergir
+    // Itera ate convergir
     while (y < x) {
         x = y;
         y = (x + n / x) / 2;
@@ -391,19 +405,19 @@ int isqrt(int n) {
     return x;
 }
 
-// Verifica se N é quadrado perfeito (usando raiz própria)
+// Verifica se N e quadrado perfeito (usando raiz propria)
 int is_perfect_square(int n) {
     if (n < 0) return 0;
     int root = isqrt(n);
     return root * root == n;
 }
 
-// Fatoração por divisão por tentativa (fallback)
+// Fatoracao por divisao por tentativa (fallback)
 int trial_division(int N) {
-    printf("Usando divisão por tentativa como fallback...\n");
+    printf("Usando divisao por tentativa como fallback...\n");
     if (N % 2 == 0) return 2;
     for (int i = 3; i * i <= N; i += 2) {
         if (N % i == 0) return i;
     }
-    return N; // N é primo
+    return N; // N e primo
 }
